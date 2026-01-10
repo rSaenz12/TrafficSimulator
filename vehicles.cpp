@@ -8,12 +8,53 @@
 
 using namespace std;
 
-vector<sedan> sedansArray;
-vector<sportsCar> sportsCarsArray;
-vector<miniVan> miniVanArray;
-vector<pickupTruck> pickupTruckArray;
+std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
+std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
+std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
+std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
 
-void populate(int speedLimit) {
+void Vehicles::createVehicles(const int speed, const bool isIntoxicated, const bool isDistracted, const int direction) {
+    setCurrentSpeed(speed);
+    setPassengers(rand() % checkSeats() + 1);
+    setIntoxication(isIntoxicated);
+    setDistraction(isDistracted);
+    setHeading(direction);
+}
+
+bool Vehicles::crashDetection(const int speedLimit) {
+    //standard chance 0.5%
+    //dist 1.5x
+    //dist+speed 10-15x
+    //intox + dist 10-15x
+    //intox + speed 15-25x
+    //intox + dist + speed 50x
+
+    double crashChance = 0.5;
+
+    const double risk = (rand()%1000)/10.0;
+
+    if (intoxicated && distracted) {
+        crashChance *= 50.0;
+    }else if (intoxicated) {
+        crashChance *= 25.0;
+    }else if (distracted) {
+        crashChance *= 15.0;
+    }
+
+    if (currentSpeed > speedLimit) {
+        crashChance *= 2.0;
+    }
+
+
+    return risk<=crashChance;
+}
+
+vector<Sedan> sedansArray;
+vector<SportsCar> sportsCarsArray;
+vector<MiniVan> miniVanArray;
+vector<PickupTruck> pickupTruckArray;
+
+void populate(const int speedLimit) {
 
     int carType = rand() % 100;
     int speedFactor = rand() % 100;
@@ -57,61 +98,59 @@ void populate(int speedLimit) {
         distracted = true;
     }
 
+    unique_ptr<Vehicles> vehicle;
+
     //sedans make up 52% of cars
     if (carType < 53) {
-        sedan sedan;
-        sedan.setCurrentSpeed(speed);
-        sedan.setPassengers(rand() % sedan.checkSeats() + 1);
-        sedan.setIntoxication(intoxicated);
-        sedan.setDistraction(distracted);
-        sedan.setHeading(heading);
-        //sedan.print();
-        sedansArray.push_back(sedan);
+        vehicle = make_unique<Sedan>();
     } else if (carType < 56) {
         //sports cars make up about 3%
-        sportsCar sportsCar;
-        sportsCar.setCurrentSpeed(speed);
-        sportsCar.setPassengers(rand() % sportsCar.checkSeats() + 1);
-        sportsCar.setIntoxication(intoxicated);
-        sportsCar.setDistraction(distracted);
-        sportsCar.setHeading(heading);
-        //sportsCar.print();
-        sportsCarsArray.push_back(sportsCar);
+        vehicle = make_unique<SportsCar>();
     } else if (carType < 65) {
         //minivans make up about 9%
-        miniVan miniVan;
-        miniVan.setCurrentSpeed(speed);
-        miniVan.setPassengers(rand() % miniVan.checkSeats() + 1);
-        miniVan.setIntoxication(intoxicated);
-        miniVan.setDistraction(distracted);
-        miniVan.setHeading(heading);
-        //miniVan.print();
-        miniVanArray.push_back(miniVan);
+        vehicle = make_unique<MiniVan>();
     } else {
         //pickup trucks make 36%
-        pickupTruck pickupTruck;
-        pickupTruck.setCurrentSpeed(speed);
-        pickupTruck.setPassengers(rand() % pickupTruck.checkSeats() + 1);
-        pickupTruck.setIntoxication(intoxicated);
-        pickupTruck.setDistraction(distracted);
-        pickupTruck.setHeading(heading);
-        //pickupTruck.print();
-        pickupTruckArray.push_back(pickupTruck);
+        vehicle = make_unique<PickupTruck>();
     }
+
+    vehicle->createVehicles(speed, intoxicated, distracted, heading);
+
+    switch (heading) {
+        case 1: {
+            northHeaded.push_back(move(vehicle));
+            break;
+        }
+        case 2: {
+            eastHeaded.push_back(move(vehicle));
+            break;
+        }
+        case 3: {
+            southHeaded.push_back(move(vehicle));
+            break;
+        }
+        case 4: {
+            westHeaded.push_back(move(vehicle));
+            break;
+        }
+    }
+
+
 }
 
-vector<sedan> returnSedanArray() {
+vector<Sedan> returnSedanArray() {
     return sedansArray;
 }
 
-vector<sportsCar> returnSportsCarArray() {
+vector<SportsCar> returnSportsCarArray() {
     return sportsCarsArray;
 }
 
-vector<miniVan> returnMiniVanArray() {
+vector<MiniVan> returnMiniVanArray() {
     return miniVanArray;
 }
 
-vector<pickupTruck> returnPickupTruck() {
+vector<PickupTruck> returnPickupTruck() {
     return pickupTruckArray;
 }
+

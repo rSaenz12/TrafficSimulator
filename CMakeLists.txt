@@ -6,4 +6,5 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(TrafficSimulator main.cpp
         vehicles.h
         vehicles.cpp
-        traffic.h)
+        traffic.h
+        traffic.cpp)

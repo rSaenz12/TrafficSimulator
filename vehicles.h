@@ -2,13 +2,13 @@
 // Created by rusty on 11/3/2025.
 //
 
-#ifndef TRAFFICSIMULATOR_VEHICLES_H
-#define TRAFFICSIMULATOR_VEHICLES_H
+#pragma once
+
 #include <vector>
+#include <memory>
 
 
-
-class vehicles {
+class Vehicles {
 protected:
     //speed
     //miles per hour
@@ -34,10 +34,15 @@ protected:
     int heading;
 
 public:
+
+
+
     //initializer chosen because these values default to 0, but will be changed for each child.
-    vehicles() : maximumSpeed(0), currentSpeed(0), length(0), width(0), weight(0), seats(0), passengers(0),
+    Vehicles() : maximumSpeed(0), currentSpeed(0), length(0), width(0), weight(0), seats(0), passengers(0),
                 distracted(false), intoxicated(false), heading(0) {
     }
+
+    virtual ~Vehicles() {}
 
     //check attributes
     int checkMaxSpeed() {
@@ -99,11 +104,14 @@ public:
         std::cout<<std::endl;
     }
 
+    void createVehicles(int speed, bool isIntoxicated, bool isDistracted, int direction);
+    bool crashDetection(int speedLimit);
+
 };
 
-class sedan: public vehicles {
+class Sedan: public Vehicles {
 public:
-    sedan() {
+    Sedan() {
         maximumSpeed = 105;
 
         length = 14;
@@ -115,16 +123,13 @@ public:
 
     void print() {
         std::cout<<"Sedan"<<std::endl;
-        vehicles::print();
+        Vehicles::print();
     }
-
-
-
 };
 
-class pickupTruck: public vehicles {
+class PickupTruck: public Vehicles {
 public:
-    pickupTruck() {
+    PickupTruck() {
         maximumSpeed = 95;
 
         length = 19;
@@ -133,15 +138,16 @@ public:
 
         seats = 5;
     }
+
     void print() {
         std::cout<<"Pickup Truck"<<std::endl;
-        vehicles::print();
+        Vehicles::print();
     }
 };
 
- class miniVan: public vehicles {
+ class MiniVan: public Vehicles {
  public:
-     miniVan() {
+     MiniVan() {
          maximumSpeed = 80;
 
          length = 17;
@@ -150,15 +156,16 @@ public:
 
          seats = 7;
      }
+
      void print() {
          std::cout<<"Mini van"<<std::endl;
-         vehicles::print();
+         Vehicles::print();
      }
  };
 
-class sportsCar:public vehicles {
+class SportsCar:public Vehicles {
 public:
-    sportsCar() {
+    SportsCar() {
         maximumSpeed = 145;
 
         length = 16;
@@ -170,18 +177,21 @@ public:
 
     void print() {
         std::cout<<"Sports Car"<<std::endl;
-        vehicles::print();
+        Vehicles::print();
     }
 };
 
 void populate(int);
 
-std::vector<sedan> returnSedanArray();
+std::vector<Sedan> returnSedanArray();
 
-std::vector<sportsCar> returnSportsCarArray();
+std::vector<SportsCar> returnSportsCarArray();
 
-std::vector<miniVan> returnMiniVanArray();
+std::vector<MiniVan> returnMiniVanArray();
 
-std::vector<pickupTruck> returnPickupTruck();
+std::vector<PickupTruck> returnPickupTruck();
 
-#endif //TRAFFICSIMULATOR_VEHICLES_H
+extern std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
+extern std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
+extern std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
+extern std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
