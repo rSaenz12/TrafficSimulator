@@ -60,7 +60,7 @@ void populate(const int speedLimit) {
     int speedFactor = rand() % 100;
     int speed = 0;
 
-    cout << carType << endl;
+    cout << carType << "car type \n";
 
     int intoxicatedChance = rand() % 100;
     bool intoxicated = false;

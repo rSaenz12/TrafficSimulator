@@ -4,6 +4,8 @@
 
 #ifndef TRAFFICSIMULATOR_TRAFFIC_H
 #define TRAFFICSIMULATOR_TRAFFIC_H
+#include <atomic>
+
 #include "vehicles.h"
 
 struct Traffic {
@@ -25,7 +27,11 @@ struct Traffic {
     int westLeftTurnLanes = 0;
     int westRightTurnLanes = 0;
 
+    std::atomic<bool> running {false};
+
     Traffic(const int speedLimit) : speedLimit(speedLimit){}
+
+    void trafficLoop();
 };
 
 void createIntersection(Traffic &intersection);

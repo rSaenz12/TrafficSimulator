@@ -3,9 +3,28 @@
 //
 
 #include <iostream>
+// #include <bits/this_thread_sleep.h>
+#include <chrono>
+#include <thread>
+
 #include "traffic.h"
 
 using namespace std;
+
+void Traffic::trafficLoop() {
+    int counter = 0;
+    while (running) {
+        populate(speedLimit);
+        this_thread::sleep_for(chrono::milliseconds(500));
+        counter++;
+
+        if (counter % 15 == 0) {
+            cout<<counter<<endl;
+        }
+    }
+
+    cout<<counter<<" Cars \n";
+}
 
 void createIntersection(Traffic &intersection) {
     int userInput=0;
@@ -82,4 +101,5 @@ void printIntersection(const Traffic &intersection) {
         vehicle->print();
     }
 }
+
 
