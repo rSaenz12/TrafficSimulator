@@ -106,6 +106,7 @@ public:
 
     void createVehicles(int speed, bool isIntoxicated, bool isDistracted, int direction);
     bool crashDetection(int speedLimit);
+    void removeVehicles();
 
 };
 

@@ -17,6 +17,7 @@ int main() {
     srand(time(nullptr));
 
     thread trafficThread;
+    thread trafficLights;
 
     Traffic intersection(45);
     createIntersection(intersection);
@@ -31,6 +32,7 @@ int main() {
     if (userInput>0) {
         intersection.running = true;
         trafficThread = thread(&Traffic::trafficLoop, &intersection);
+        trafficLights = thread(&Traffic::trafficLightsLoop, &intersection);
     }
 
     userInput = 0;
@@ -42,7 +44,9 @@ int main() {
 
     if (userInput > 0) {
         intersection.running = false;
+
         trafficThread.join();
+        trafficLights.join();
     }
 
     printIntersection(intersection);
