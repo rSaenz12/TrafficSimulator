@@ -8,10 +8,14 @@
 
 using namespace std;
 
-std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
-std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
-std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
-std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
+// std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
+// std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
+// std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
+// std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
+std::deque<std::unique_ptr<Vehicles>> northHeaded; //1
+std::deque<std::unique_ptr<Vehicles>> eastHeaded; //2
+std::deque<std::unique_ptr<Vehicles>> southHeaded; //3
+std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
 
 
 

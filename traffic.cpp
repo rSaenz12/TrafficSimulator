@@ -125,10 +125,14 @@ int Traffic::checkActiveLane() {
     return -1;
 }
 
-void Traffic::popVehicles(vector<unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction) {
+//change all the headings vectors to deque so that you can use deque.pop_front(), its faster and better than vector.erase(vector.begin()).
+// void Traffic::popVehicles(vector<unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction) {
+void Traffic::popVehicles(deque<unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction) {
     for (int i=0; i<numberOfLanes; i++) {
         if (!headingVector.empty()) {
-            headingVector.pop_back();
+            // headingVector.pop_back();
+            // headingVector.erase(headingVector.begin());
+            headingVector.pop_front();
             cout<<"popped "<<direction<<"\n";
         }else {
             break;

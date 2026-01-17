@@ -70,7 +70,9 @@ struct Traffic {
     std::atomic<bool> goThroughLight {false};
 
     void passVehiclesThroughIntersection();
-    void popVehicles(std::vector<std::unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction);
+    // void popVehicles(std::vector<std::unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction);
+    void popVehicles(std::deque<std::unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction);
+
 };
 
 void checkUserInput(int &userInput);

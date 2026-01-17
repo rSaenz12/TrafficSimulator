@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <memory>
+#include <deque>
 
 // //directions and their indexes
 // constexpr int north = 0;
@@ -223,7 +224,12 @@ void populate(int);
 
 // std::vector<std::unique_ptr<Vehicles>> return
 
-extern std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
-extern std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
-extern std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
-extern std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
+// extern std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
+// extern std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
+// extern std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
+// extern std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
+
+extern std::deque<std::unique_ptr<Vehicles>> northHeaded; //1
+extern std::deque<std::unique_ptr<Vehicles>> eastHeaded; //2
+extern std::deque<std::unique_ptr<Vehicles>> southHeaded; //3
+extern std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
