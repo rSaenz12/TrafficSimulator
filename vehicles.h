@@ -7,6 +7,35 @@
 #include <vector>
 #include <memory>
 
+// //directions and their indexes
+// constexpr int north = 0;
+// constexpr int northLeft = 1;
+// constexpr int northRight = 2;
+// constexpr int east = 3;
+// constexpr int eastLeft = 4;
+// constexpr int eastRight = 5;
+// constexpr int south = 6;
+// constexpr int southLeft = 7;
+// constexpr int southRight = 8;
+// constexpr int west = 9;
+// constexpr int westLeft = 10;
+// constexpr int westRight = 11;
+
+//directions and their indexes
+constexpr int northSouth = 0;
+constexpr int northSouthLeft = 1;
+
+constexpr int eastWest = 2;
+constexpr int eastWestLeft = 3;
+
+constexpr int south = 0;
+constexpr int southLeft = 1;
+
+constexpr int west = 2;
+constexpr int westLeft = 3;
+
+
+
 
 class Vehicles {
 protected:
@@ -184,13 +213,15 @@ public:
 
 void populate(int);
 
-std::vector<Sedan> returnSedanArray();
+// std::vector<Sedan> returnSedanArray();
+//
+// std::vector<SportsCar> returnSportsCarArray();
+//
+// std::vector<MiniVan> returnMiniVanArray();
+//
+// std::vector<PickupTruck> returnPickupTruck();
 
-std::vector<SportsCar> returnSportsCarArray();
-
-std::vector<MiniVan> returnMiniVanArray();
-
-std::vector<PickupTruck> returnPickupTruck();
+// std::vector<std::unique_ptr<Vehicles>> return
 
 extern std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
 extern std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2

@@ -11,11 +11,35 @@
 
 using namespace std;
 
+void delay(int delayTimer, bool emergencyExit) {
+    if (delayTimer>500) {
+        cout<<"Timer exceeds 500 seconds \n";
+        return;
+    }
+
+    // auto timerDuration = static_cast<chrono::seconds>(delayTimer);
+    std::chrono::seconds timerDuration{delayTimer};
+
+    auto now = chrono::steady_clock::now();
+
+    while (emergencyExit) {
+        auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
+
+        if (currentTime >= timerDuration) {
+            break;
+        }else {
+            this_thread::sleep_for(chrono::milliseconds(100));
+        }
+    }
+}
+
 void Traffic::trafficLoop() {
     int counter = 0;
     while (running) {
         populate(speedLimit);
-        this_thread::sleep_for(chrono::milliseconds(500));
+
+        delay(2, running);
+
         counter++;
 
         if (counter % 15 == 0) {
@@ -63,27 +87,31 @@ void Traffic::trafficLoop() {
 //     }
 // }
 
-
 void Traffic::trafficLightsLoop() {
+
     northSouthLight.currentLight = greenLight;
     cout << "northSouthLight is green, eastWestLight is red. \n";
+
 
     while (running) {
         auto timerDuration = (northSouthLight.currentLight == greenLight)
                                  ? northSouthLight.greenLightTime
                                  : eastWestLight.greenLightTime;
+        //
+        // auto now = chrono::steady_clock::now();
+        //
+        // while (running) {
+        //     auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
+        //
+        //     if (currentTime >= timerDuration) {
+        //         break;
+        //     } else {
+        //         this_thread::sleep_for(chrono::milliseconds(100));
+        //     }
+        // }
 
-        auto now = chrono::steady_clock::now();
+        delay(static_cast<int>(timerDuration.count()), running);
 
-        while (running) {
-            auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
-
-            if (currentTime >= timerDuration) {
-                break;
-            } else {
-                this_thread::sleep_for(chrono::milliseconds(100));
-            }
-        }
 
         if (northSouthLight.currentLight == greenLight) {
             northSouthLight.currentLight = redLight;
@@ -99,12 +127,87 @@ void Traffic::trafficLightsLoop() {
     }
 }
 
+int Traffic::checkActiveLane() {
+    for (TrafficLight *light : lightsVector) {
+        if (light->currentLight == greenLight) {
+            return light->headingID;
+        }
+    }
+}
+
+void Traffic::passVehiclesThroughIntersection() {
+
+    while (running) {
+
+        // auto timerDuration =  static_cast<std::chrono::seconds>(3);
+        //
+        // auto now = chrono::steady_clock::now();
+        //
+        // while (running) {
+        //     auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
+        //
+        //     if (currentTime >= timerDuration) {
+        //         break;
+        //     }else {
+        //         this_thread::sleep_for(chrono::milliseconds(100));
+        //     }
+        // }
+
+        delay(1, running);
+
+        int currentHeading = checkActiveLane();
+        switch (currentHeading) {
+            case northSouth: {
+                if (!northHeaded.empty()){
+                    northHeaded.pop_back();
+                    cout<<"popped North \n";
+                }
+                if (!southHeaded.empty()) {
+                   southHeaded.pop_back();
+                    cout<<"popped South \n";
+                }
+                break;
+            }
+            case eastWest: {
+                if (!eastHeaded.empty() ){
+                    eastHeaded.pop_back();
+                    cout<<"popped East \n";
+                }
+                if (!westHeaded.empty()){
+                    westHeaded.pop_back();
+                    cout<<"popped West \n";
+                }
+            }
+        }
+
+    }
+
+}
+
+void Traffic::addLights() {
+    lightsVector.push_back(&northSouthLight);
+    lightsVector.push_back(&northSouthTurnLight);
+
+    lightsVector.push_back(&eastWestLight);
+    lightsVector.push_back(&eastWestTurnLight);
+}
+
+void checkUserInput(int &userInput) {
+    if (userInput>=0) {
+    }else {
+        userInput = 0;
+    }
+}
+
 void createIntersection(Traffic &intersection) {
     int userInput = 0;
 
     cout << "North bound";
     cin >> userInput;
+    checkUserInput(userInput);
     intersection.northBoundLanes = userInput;
+
+
     //
     // cout<<"North left turn lanes";
     // cin >> userInput;
@@ -116,6 +219,7 @@ void createIntersection(Traffic &intersection) {
 
     cout << "East bound";
     cin >> userInput;
+    checkUserInput(userInput);
     intersection.eastBoundLanes = userInput;
     // cout<<"East left turn lanes";
     // cin >> userInput;
@@ -127,6 +231,7 @@ void createIntersection(Traffic &intersection) {
 
     cout << "South bound";
     cin >> userInput;
+    checkUserInput(userInput);
     intersection.southBoundLanes = userInput;
     // cout<<"South left turn lanes";
     // cin >> userInput;
@@ -137,6 +242,7 @@ void createIntersection(Traffic &intersection) {
 
     cout << "West bound";
     cin >> userInput;
+    checkUserInput(userInput);
     intersection.westBoundLanes = userInput;
     // cout<<"West left turn lanes";
     // cin >> userInput;
@@ -147,11 +253,15 @@ void createIntersection(Traffic &intersection) {
 
     cout << "North South Light timer: ";
     cin >> userInput;
+    checkUserInput(userInput);
     intersection.northSouthLight.greenLightTime = static_cast<chrono::seconds>(userInput);
 
     cout << "East West Light timer: ";
     cin >> userInput;
+    checkUserInput(userInput);
     intersection.eastWestLight.greenLightTime = static_cast<chrono::seconds>(userInput);
+
+    intersection.addLights();
 }
 
 void printIntersection(const Traffic &intersection) {

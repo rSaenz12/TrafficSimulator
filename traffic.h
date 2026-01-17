@@ -11,25 +11,38 @@
 constexpr bool greenLight = true;
 constexpr bool redLight = false;
 
+using namespace std;
+
 struct TrafficLight {
     std::chrono::seconds greenLightTime =  static_cast<std::chrono::seconds>(0);
 
+    int headingID = 0;
+
     //greenLight is true, reLight is false
     std::atomic<bool> currentLight {redLight};
+
+    TrafficLight(const int headingID) : headingID(headingID){}
+
+    TrafficLight(TrafficLight&& other) noexcept
+    : greenLightTime(other.greenLightTime),
+          headingID(other.headingID) {}
 };
 
 struct Traffic {
     int speedLimit = 0;
+    std::vector<TrafficLight*> lightsVector;
 
-    TrafficLight northSouthLight;
-    TrafficLight northSouthTurnLight;
+    TrafficLight northSouthLight{northSouth};
+    //left turns
+    TrafficLight northSouthTurnLight{northSouthLeft};
 
     int northBoundLanes = 0;
     int northLeftTurnLanes = 0;
     int northRightTurnLanes = 0;
 
-    TrafficLight eastWestLight;
-    TrafficLight eastWestTurnLight;
+    TrafficLight eastWestLight{eastWest};
+    //lect turns
+    TrafficLight eastWestTurnLight{eastWestLeft};
 
     int eastBoundLanes = 0;
     int eastLeftTurnLanes = 0;
@@ -47,13 +60,25 @@ struct Traffic {
 
     Traffic(const int speedLimit) : speedLimit(speedLimit){}
 
+    void addLights();
+
     void trafficLoop();
     void trafficLightsLoop();
+
+    int checkActiveLane();
+
+    std::atomic<bool> goThroughLight {false};
+
+    void passVehiclesThroughIntersection();
 };
+
+void checkUserInput(int &userInput);
 
 void createIntersection(Traffic &intersection);
 
 void printIntersection(const Traffic &intersection);
+
+void delay(int delayTimer, bool emergencyExit);
 
 
 

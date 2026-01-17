@@ -13,11 +13,15 @@
 
 
 using namespace std;
+
+void delay(int delayTimer);
+
 int main() {
     srand(time(nullptr));
 
     thread trafficThread;
     thread trafficLights;
+    thread runningTraffic;
 
     Traffic intersection(45);
     createIntersection(intersection);
@@ -33,6 +37,7 @@ int main() {
         intersection.running = true;
         trafficThread = thread(&Traffic::trafficLoop, &intersection);
         trafficLights = thread(&Traffic::trafficLightsLoop, &intersection);
+        runningTraffic = thread(&Traffic::passVehiclesThroughIntersection, &intersection);
     }
 
     userInput = 0;
@@ -47,8 +52,11 @@ int main() {
 
         trafficThread.join();
         trafficLights.join();
+        runningTraffic.join();
     }
+
 
     printIntersection(intersection);
     return 0;
 }
+

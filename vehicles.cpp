@@ -13,6 +13,8 @@ std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
 std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
 std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
 
+
+
 void Vehicles::createVehicles(const int speed, const bool isIntoxicated, const bool isDistracted, const int direction) {
     setCurrentSpeed(speed);
     setPassengers(rand() % checkSeats() + 1);
@@ -48,11 +50,6 @@ bool Vehicles::crashDetection(const int speedLimit) {
 
     return risk<=crashChance;
 }
-
-vector<Sedan> sedansArray;
-vector<SportsCar> sportsCarsArray;
-vector<MiniVan> miniVanArray;
-vector<PickupTruck> pickupTruckArray;
 
 void populate(const int speedLimit) {
 
@@ -134,23 +131,5 @@ void populate(const int speedLimit) {
             break;
         }
     }
-
-
-}
-
-vector<Sedan> returnSedanArray() {
-    return sedansArray;
-}
-
-vector<SportsCar> returnSportsCarArray() {
-    return sportsCarsArray;
-}
-
-vector<MiniVan> returnMiniVanArray() {
-    return miniVanArray;
-}
-
-vector<PickupTruck> returnPickupTruck() {
-    return pickupTruckArray;
 }
 
