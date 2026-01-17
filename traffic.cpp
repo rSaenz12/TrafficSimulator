@@ -11,16 +11,15 @@
 
 using namespace std;
 
-void delay(int delayTimer, bool emergencyExit) {
+void delay(int delayTimer, const std::atomic<bool> &emergencyExit) {
     if (delayTimer>500) {
         cout<<"Timer exceeds 500 seconds \n";
         return;
     }
 
-    // auto timerDuration = static_cast<chrono::seconds>(delayTimer);
-    std::chrono::seconds timerDuration{delayTimer};
+    const std::chrono::seconds timerDuration{delayTimer};
 
-    auto now = chrono::steady_clock::now();
+    const auto now = chrono::steady_clock::now();
 
     while (emergencyExit) {
         auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
@@ -38,7 +37,7 @@ void Traffic::trafficLoop() {
     while (running) {
         populate(speedLimit);
 
-        delay(2, running);
+        delay(1, running);
 
         counter++;
 
@@ -97,18 +96,6 @@ void Traffic::trafficLightsLoop() {
         auto timerDuration = (northSouthLight.currentLight == greenLight)
                                  ? northSouthLight.greenLightTime
                                  : eastWestLight.greenLightTime;
-        //
-        // auto now = chrono::steady_clock::now();
-        //
-        // while (running) {
-        //     auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
-        //
-        //     if (currentTime >= timerDuration) {
-        //         break;
-        //     } else {
-        //         this_thread::sleep_for(chrono::milliseconds(100));
-        //     }
-        // }
 
         delay(static_cast<int>(timerDuration.count()), running);
 
@@ -133,50 +120,78 @@ int Traffic::checkActiveLane() {
             return light->headingID;
         }
     }
+
+    //error handled, shouldnt crash but no cars will leaving seeing green
+    return -1;
+}
+
+void Traffic::popVehicles(vector<unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction) {
+    for (int i=0; i<numberOfLanes; i++) {
+        if (!headingVector.empty()) {
+            headingVector.pop_back();
+            cout<<"popped "<<direction<<"\n";
+        }else {
+            break;
+        }
+    }
 }
 
 void Traffic::passVehiclesThroughIntersection() {
 
     while (running) {
 
-        // auto timerDuration =  static_cast<std::chrono::seconds>(3);
-        //
-        // auto now = chrono::steady_clock::now();
-        //
-        // while (running) {
-        //     auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
-        //
-        //     if (currentTime >= timerDuration) {
-        //         break;
-        //     }else {
-        //         this_thread::sleep_for(chrono::milliseconds(100));
-        //     }
-        // }
-
         delay(1, running);
 
         int currentHeading = checkActiveLane();
         switch (currentHeading) {
             case northSouth: {
-                if (!northHeaded.empty()){
-                    northHeaded.pop_back();
-                    cout<<"popped North \n";
-                }
-                if (!southHeaded.empty()) {
-                   southHeaded.pop_back();
-                    cout<<"popped South \n";
-                }
+                //for loops added because if x lanes, x amount of cars at the front that go.
+                // for (int i=0; i<northBoundLanes; i++) {
+                //   if (!northHeaded.empty()){
+                //     northHeaded.pop_back();
+                //     cout<<"popped North \n";
+                //   }else {
+                //       break;
+                //   }
+                // }
+                //
+                // for (int i=0; i<southBoundLanes;i++){
+                //     if (!southHeaded.empty()) {
+                //         southHeaded.pop_back();
+                //         cout<<"popped South \n";
+                //     }else {
+                //         break;
+                //     }
+                // }
+
+                popVehicles(northHeaded, northBoundLanes, "North");
+                popVehicles(southHeaded, southBoundLanes, "South");
+
                 break;
             }
             case eastWest: {
-                if (!eastHeaded.empty() ){
-                    eastHeaded.pop_back();
-                    cout<<"popped East \n";
-                }
-                if (!westHeaded.empty()){
-                    westHeaded.pop_back();
-                    cout<<"popped West \n";
-                }
+                // for (int i=0; i<eastBoundLanes; i++){
+                //     if (!eastHeaded.empty() ){
+                //         eastHeaded.pop_back();
+                //         cout<<"popped East \n";
+                //     }else {
+                //         break;
+                //     }
+                // }
+                //
+                // for (int i=0; i<westBoundLanes; i++){
+                //     if (!westHeaded.empty()){
+                //         westHeaded.pop_back();
+                //         cout<<"popped West \n";
+                //     }else {
+                //         break;
+                //     }
+                // }
+
+                popVehicles(eastHeaded, eastBoundLanes, "East");
+                popVehicles(westHeaded, westBoundLanes, "West");
+
+                break;
             }
         }
 
