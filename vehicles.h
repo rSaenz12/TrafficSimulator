@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <iostream>
+
 #include <vector>
 #include <memory>
 #include <deque>
@@ -23,45 +25,48 @@
 // constexpr int westRight = 11;
 
 //directions and their indexes
-constexpr int northSouth = 0;
-constexpr int northSouthLeft = 1;
+constexpr uint8_t northSouth = 0;
+constexpr uint8_t northSouthLeft = 1;
 
-constexpr int eastWest = 2;
-constexpr int eastWestLeft = 3;
+constexpr uint8_t eastWest = 2;
+constexpr uint8_t eastWestLeft = 3;
 
-constexpr int south = 0;
-constexpr int southLeft = 1;
+constexpr uint8_t south = 0;
+constexpr uint8_t southLeft = 1;
 
-constexpr int west = 2;
-constexpr int westLeft = 3;
+constexpr uint8_t west = 2;
+constexpr uint8_t westLeft = 3;
 
 
 
 
 class Vehicles {
 protected:
-    //speed
-    //miles per hour
-    int maximumSpeed; // will be fixed num based on type of vehicle
-    // will be a range depending on the speed limit and max speed, statistics will determine it.
-    int currentSpeed;
 
     //size and weight
     // will be fixed values based on the type of vehicle
     //feet and pounds
-    int length;
-    int width;
     int weight;
+    uint8_t length;
+    uint8_t width;
 
-    //misc
-    int seats; // will be fixed num based on type of vehicle
-    int passengers; // will be random 1 to seats
-    bool distracted; // will be random based on statistics
-    bool intoxicated; // will be random based on statistics
+    //speed
+    //miles per hour
+    uint8_t maximumSpeed; // will be fixed num based on type of vehicle
+    // will be a range depending on the speed limit and max speed, statistics will determine it.
+    uint8_t currentSpeed;
 
     //direction
     //1= north, 2= east,3= south, 4= west
-    int heading;
+    uint8_t heading;
+
+    //misc
+    uint8_t seats; // will be fixed num based on type of vehicle
+    uint8_t passengers; // will be random 1 to seats
+    bool distracted; // will be random based on statistics
+    bool intoxicated; // will be random based on statistics
+
+
 
 public:
 
@@ -104,23 +109,23 @@ public:
     }
 
     //set attributes that are randomly chosen
-    void setCurrentSpeed(int speed) {
+    void setCurrentSpeed(const uint8_t speed) {
         currentSpeed = speed;
     }
 
-    void setPassengers(int people) {
+    void setPassengers(const uint8_t people) {
         passengers = people;
     }
 
-    void setIntoxication(bool intoxication) {
+    void setIntoxication(const bool intoxication) {
         intoxicated = intoxication;
     }
 
-    void setDistraction(bool distraction) {
+    void setDistraction(const bool distraction) {
         distracted = distraction;
     }
 
-    void setHeading(int direction) {
+    void setHeading(const uint8_t direction) {
         heading = direction;
     }
 
@@ -134,8 +139,8 @@ public:
         std::cout<<std::endl;
     }
 
-    void createVehicles(int speed, bool isIntoxicated, bool isDistracted, int direction);
-    bool crashDetection(int speedLimit);
+    void createVehicles(uint8_t speed, bool isIntoxicated, bool isDistracted, uint8_t direction);
+    bool crashDetection(uint8_t speedLimit);
     void removeVehicles();
 
 };
@@ -212,7 +217,7 @@ public:
     }
 };
 
-void populate(int);
+void populate(uint8_t speedLimit);
 
 // std::vector<Sedan> returnSedanArray();
 //

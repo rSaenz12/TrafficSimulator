@@ -19,7 +19,7 @@ std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
 
 
 
-void Vehicles::createVehicles(const int speed, const bool isIntoxicated, const bool isDistracted, const int direction) {
+void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, const bool isDistracted, const uint8_t direction) {
     setCurrentSpeed(speed);
     setPassengers(rand() % checkSeats() + 1);
     setIntoxication(isIntoxicated);
@@ -28,7 +28,7 @@ void Vehicles::createVehicles(const int speed, const bool isIntoxicated, const b
 }
 
 //checks if a car is crashing, probably run as car is going
-bool Vehicles::crashDetection(const int speedLimit) {
+bool Vehicles::crashDetection(const uint8_t speedLimit) {
     //standard chance 0.5%
     //dist 1.5x
     //dist+speed 10-15x
@@ -55,7 +55,7 @@ bool Vehicles::crashDetection(const int speedLimit) {
     return risk<=crashChance;
 }
 
-void populate(const int speedLimit) {
+void populate(const uint8_t speedLimit) {
 
     int carType = rand() % 100;
     int speedFactor = rand() % 100;
