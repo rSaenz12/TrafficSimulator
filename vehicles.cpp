@@ -48,14 +48,9 @@ void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, con
     totalSpeed += currentSpeed;
 }
 
-//checks if a car is crashing, probably run as car is going
+//checks if a car is crashing
+//uses a combination of factors to calculate probability
 bool Vehicles::crashDetection(const uint8_t speedLimit) {
-    //standard chance 0.5%
-    //dist 1.5x
-    //dist+speed 10-15x
-    //intox + dist 10-15x
-    //intox + speed 15-25x
-    //intox + dist + speed 50x
 
     double crashChance = 0.5;
 
@@ -72,13 +67,6 @@ bool Vehicles::crashDetection(const uint8_t speedLimit) {
     if (currentSpeed > speedLimit) {
         crashChance *= 2.0;
     }
-
-    // const bool isCrashed = risk <= crashChance;
-    // if (isCrashed) {
-    //     crashes++;
-    // }
-    //
-    // return isCrashed;
 
     return  risk <= crashChance;
 }

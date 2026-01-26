@@ -52,8 +52,6 @@ struct Traffic {
 
     std::atomic<bool> running{false};
 
-    // Traffic(const uint8_t speedLimit) : speedLimit(speedLimit){}
-
     void addLights();
 
     void trafficLoop();

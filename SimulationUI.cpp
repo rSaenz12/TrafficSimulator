@@ -16,19 +16,18 @@ void setupMenu(const ImGuiWindowFlags window_flags, Traffic &intersection, int &
     End();
 
     //lanes
-
     static int northSouthIndex = 2;
     static int eastWestIndex = 2;
     const char *lane_options[] = {"1", "2", "3"};
 
     Begin("Lane Selection", nullptr, window_flags);
     if (Combo("North/South Lanes", &northSouthIndex, lane_options, IM_ARRAYSIZE(lane_options))) {
-        // Index 0 = 1 lane, Index 1 = 2 lanes, etc.
+        //index 0 = 1 lane, Index 1 = 2 lanes, etc.
         northSouthLanes = northSouthIndex + 1;
     }
 
     if (Combo("East/West Lanes", &eastWestIndex, lane_options, IM_ARRAYSIZE(lane_options))) {
-        // Index 0 = 1 lane, Index 1 = 2 lanes, etc.
+        //index 0 = 1 lane, Index 1 = 2 lanes, etc.
         eastWestLanes = eastWestIndex + 1;
     }
     End();
@@ -45,8 +44,6 @@ void setupMenu(const ImGuiWindowFlags window_flags, Traffic &intersection, int &
 }
 
 void buildRoad(const int northSouthLanes, const int eastWestLanes, const ImGuiWindowFlags window_flags, Traffic &intersection) {
-    // using namespace ImGui;
-
 
     SetNextWindowPos(ImVec2(250, 50), ImGuiCond_FirstUseEver);
     SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
@@ -289,7 +286,7 @@ void drawDashedLine(ImDrawList *draw_list, const ImVec2 start, const ImVec2 void
 
         const float checkCoord = isVertical ? p_start.y : p_start.x;
 
-        //skip if this dash starts inside the intersection
+        //skips over void area
         if (checkCoord > voidArea.x && checkCoord < voidArea.y) {
             continue;
         }

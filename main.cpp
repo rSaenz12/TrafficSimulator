@@ -71,7 +71,6 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
-    // int lanes = 3; // Change this to 1 or 2 to see it scale!
     int northSouthLanes = 3;
     int eastWestLanes = 3;
 
