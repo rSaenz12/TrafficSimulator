@@ -53,7 +53,7 @@ int main() {
 
     if (!glfwInit()) return 1;
 
-    GLFWwindow *window = glfwCreateWindow(1280, 720, "Traffic Sim Learning", nullptr, nullptr);
+    GLFWwindow *window = glfwCreateWindow(1280, 720, "Traffic Simulation", nullptr, nullptr);
     if (!window) return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
