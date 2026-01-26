@@ -10,39 +10,15 @@
 #include <memory>
 #include <deque>
 
-// //directions and their indexes
-// constexpr int north = 0;
-// constexpr int northLeft = 1;
-// constexpr int northRight = 2;
-// constexpr int east = 3;
-// constexpr int eastLeft = 4;
-// constexpr int eastRight = 5;
-// constexpr int south = 6;
-// constexpr int southLeft = 7;
-// constexpr int southRight = 8;
-// constexpr int west = 9;
-// constexpr int westLeft = 10;
-// constexpr int westRight = 11;
-
 //directions and their indexes
 constexpr uint8_t northSouth = 0;
-constexpr uint8_t northSouthLeft = 1;
-
-constexpr uint8_t eastWest = 2;
-constexpr uint8_t eastWestLeft = 3;
-
 constexpr uint8_t south = 0;
-constexpr uint8_t southLeft = 1;
-
+constexpr uint8_t eastWest = 2;
 constexpr uint8_t west = 2;
-constexpr uint8_t westLeft = 3;
-
-
 
 
 class Vehicles {
 protected:
-
     //size and weight
     // will be fixed values based on the type of vehicle
     //feet and pounds
@@ -65,19 +41,16 @@ protected:
     uint8_t passengers; // will be random 1 to seats
     bool distracted; // will be random based on statistics
     bool intoxicated; // will be random based on statistics
-
-
+    bool crash;
 
 public:
-
-
-
     //initializer chosen because these values default to 0, but will be changed for each child.
     Vehicles() : maximumSpeed(0), currentSpeed(0), length(0), width(0), weight(0), seats(0), passengers(0),
-                distracted(false), intoxicated(false), heading(0) {
+                 distracted(false), intoxicated(false), heading(0) {
     }
 
-    virtual ~Vehicles() {}
+    virtual ~Vehicles() {
+    }
 
     //check attributes
     int checkMaxSpeed() {
@@ -125,27 +98,32 @@ public:
         distracted = distraction;
     }
 
+    void setCrash(const bool crashed) {
+        crash = crashed;
+    }
+
     void setHeading(const uint8_t direction) {
         heading = direction;
     }
 
     //print
     void print() {
-        std::cout<<"Speed: "<< currentSpeed<<std::endl;
-        std::cout<<"Passengers:  "<<passengers<<std::endl;
-        std::cout<<"Intoxicated: "<<intoxicated<<std::endl;
-        std::cout<<"Distracted: "<<distracted<<std::endl;
-        std::cout<<"Direction: "<<heading<<std::endl;
-        std::cout<<std::endl;
+        std::cout << "Speed: " << currentSpeed << std::endl;
+        std::cout << "Passengers:  " << passengers << std::endl;
+        std::cout << "Intoxicated: " << intoxicated << std::endl;
+        std::cout << "Distracted: " << distracted << std::endl;
+        std::cout << "Direction: " << heading << std::endl;
+        std::cout << std::endl;
     }
 
     void createVehicles(uint8_t speed, bool isIntoxicated, bool isDistracted, uint8_t direction);
-    bool crashDetection(uint8_t speedLimit);
-    void removeVehicles();
 
+    bool crashDetection(uint8_t speedLimit);
+
+    void removeVehicles();
 };
 
-class Sedan: public Vehicles {
+class Sedan : public Vehicles {
 public:
     Sedan() {
         maximumSpeed = 105;
@@ -158,12 +136,12 @@ public:
     }
 
     void print() {
-        std::cout<<"Sedan"<<std::endl;
+        std::cout << "Sedan" << std::endl;
         Vehicles::print();
     }
 };
 
-class PickupTruck: public Vehicles {
+class PickupTruck : public Vehicles {
 public:
     PickupTruck() {
         maximumSpeed = 95;
@@ -176,65 +154,59 @@ public:
     }
 
     void print() {
-        std::cout<<"Pickup Truck"<<std::endl;
+        std::cout << "Pickup Truck" << std::endl;
         Vehicles::print();
     }
 };
 
- class MiniVan: public Vehicles {
- public:
-     MiniVan() {
-         maximumSpeed = 80;
+class MiniVan : public Vehicles {
+public:
+    MiniVan() {
+        maximumSpeed = 80;
 
-         length = 17;
-         width = 7;
-         weight = 4500;
+        length = 17;
+        width = 7;
+        weight = 4500;
 
-         seats = 7;
-     }
+        seats = 7;
+    }
 
-     void print() {
-         std::cout<<"Mini van"<<std::endl;
-         Vehicles::print();
-     }
- };
+    void print() {
+        std::cout << "Mini van" << std::endl;
+        Vehicles::print();
+    }
+};
 
-class SportsCar:public Vehicles {
+class SportsCar : public Vehicles {
 public:
     SportsCar() {
         maximumSpeed = 145;
 
         length = 16;
-        width =6;
-        weight= 3000;
+        width = 6;
+        weight = 3000;
 
         seats = 2;
     }
 
     void print() {
-        std::cout<<"Sports Car"<<std::endl;
+        std::cout << "Sports Car" << std::endl;
         Vehicles::print();
     }
 };
 
 void populate(uint8_t speedLimit);
 
-// std::vector<Sedan> returnSedanArray();
-//
-// std::vector<SportsCar> returnSportsCarArray();
-//
-// std::vector<MiniVan> returnMiniVanArray();
-//
-// std::vector<PickupTruck> returnPickupTruck();
 
-// std::vector<std::unique_ptr<Vehicles>> return
+extern std::deque<std::unique_ptr<Vehicles> > northHeaded; //1
+extern std::deque<std::unique_ptr<Vehicles> > eastHeaded; //2
+extern std::deque<std::unique_ptr<Vehicles> > southHeaded; //3
+extern std::deque<std::unique_ptr<Vehicles> > westHeaded; //4
 
-// extern std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
-// extern std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
-// extern std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
-// extern std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
-
-extern std::deque<std::unique_ptr<Vehicles>> northHeaded; //1
-extern std::deque<std::unique_ptr<Vehicles>> eastHeaded; //2
-extern std::deque<std::unique_ptr<Vehicles>> southHeaded; //3
-extern std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
+extern uint8_t intoxicatedDrivers;
+extern uint8_t distractedDrivers;
+extern uint8_t crashes;
+extern uint16_t totalDrivers;
+extern uint16_t totalPassengers;
+extern uint32_t totalWeight;
+extern uint32_t totalSpeed;

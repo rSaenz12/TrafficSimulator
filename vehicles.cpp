@@ -8,23 +8,44 @@
 
 using namespace std;
 
-// std::vector<std::unique_ptr<Vehicles>> northHeaded; //1
-// std::vector<std::unique_ptr<Vehicles>> eastHeaded; //2
-// std::vector<std::unique_ptr<Vehicles>> southHeaded; //3
-// std::vector<std::unique_ptr<Vehicles>> westHeaded; //4
-std::deque<std::unique_ptr<Vehicles>> northHeaded; //1
-std::deque<std::unique_ptr<Vehicles>> eastHeaded; //2
-std::deque<std::unique_ptr<Vehicles>> southHeaded; //3
-std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
+std::deque<std::unique_ptr<Vehicles> > northHeaded; //1
+std::deque<std::unique_ptr<Vehicles> > eastHeaded; //2
+std::deque<std::unique_ptr<Vehicles> > southHeaded; //3
+std::deque<std::unique_ptr<Vehicles> > westHeaded; //4
+
+//totals of sim
+uint8_t intoxicatedDrivers = 0;
+uint8_t distractedDrivers = 0;
+uint8_t crashes = 0;
+
+//also doubles as total cars
+uint16_t totalDrivers = 0;
+uint16_t totalPassengers = 0;
+uint32_t totalWeight = 0;
+
+//will be used a totalSpeed/totalDrivers = average speed
+uint32_t totalSpeed = 0;
 
 
-
-void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, const bool isDistracted, const uint8_t direction) {
+void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, const bool isDistracted,
+                              const uint8_t direction) {
     setCurrentSpeed(speed);
     setPassengers(rand() % checkSeats() + 1);
     setIntoxication(isIntoxicated);
     setDistraction(isDistracted);
+    setCrash(crashDetection(speed));
     setHeading(direction);
+
+    //updating totals
+    totalDrivers ++;
+    //taking advantage of bool being 1 or 0
+    intoxicatedDrivers += intoxicated;
+    distractedDrivers += distracted;
+
+    crashes += crash;
+    totalPassengers += passengers;
+    totalWeight += weight;
+    totalSpeed += currentSpeed;
 }
 
 //checks if a car is crashing, probably run as car is going
@@ -38,13 +59,13 @@ bool Vehicles::crashDetection(const uint8_t speedLimit) {
 
     double crashChance = 0.5;
 
-    const double risk = (rand()%1000)/10.0;
+    const double risk = (rand() % 1000) / 10.0;
 
     if (intoxicated && distracted) {
         crashChance *= 50.0;
-    }else if (intoxicated) {
+    } else if (intoxicated) {
         crashChance *= 25.0;
-    }else if (distracted) {
+    } else if (distracted) {
         crashChance *= 15.0;
     }
 
@@ -52,20 +73,27 @@ bool Vehicles::crashDetection(const uint8_t speedLimit) {
         crashChance *= 2.0;
     }
 
-    return risk<=crashChance;
+    // const bool isCrashed = risk <= crashChance;
+    // if (isCrashed) {
+    //     crashes++;
+    // }
+    //
+    // return isCrashed;
+
+    return  risk <= crashChance;
 }
 
 void populate(const uint8_t speedLimit) {
 
-    int carType = rand() % 100;
-    int speedFactor = rand() % 100;
+    const int carType = rand() % 100;
+    const int speedFactor = rand() % 100;
     int speed = 0;
 
-    cout << carType << "car type \n";
+    // cout << carType << "car type \n";
 
-    int intoxicatedChance = rand() % 100;
+    const int intoxicatedChance = rand() % 100;
     bool intoxicated = false;
-    int distractedChance = rand() % 100;
+    const int distractedChance = rand() % 100;
     bool distracted = false;
 
     int heading = rand() % 4 + 1;
@@ -92,11 +120,13 @@ void populate(const uint8_t speedLimit) {
 
     if (intoxicatedChance <= 3) {
         intoxicated = true;
+        // intoxicatedDrivers++;
     }
 
     //estimated around 10% of drivers are
     if (distractedChance <= 10) {
         distracted = true;
+        // distractedDrivers++;
     }
 
     unique_ptr<Vehicles> vehicle;
@@ -136,4 +166,3 @@ void populate(const uint8_t speedLimit) {
         }
     }
 }
-

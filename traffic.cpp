@@ -3,142 +3,81 @@
 //
 
 #include <iostream>
-// #include <bits/this_thread_sleep.h>
-#include <chrono>
+
 #include <thread>
 
 #include "traffic.h"
 
+
 using namespace std;
 
-void delay(int delayTimer, const std::atomic<bool> &emergencyExit) {
-    if (delayTimer>500) {
-        cout<<"Timer exceeds 500 seconds \n";
-        return;
+chrono::seconds greenLightTimeRemaining(0);
+
+void delay(int delayTimer, const std::atomic<bool> &emergencyExit, chrono::seconds *timeRemaining) {
+    if (delayTimer > 50000) {
+        cout << "Timer exceeds 50000  \n";
+        delayTimer = 500;
     }
 
-    const std::chrono::seconds timerDuration{delayTimer};
+    delayTimer = delayTimer * 100;
+
+    const std::chrono::milliseconds timerDuration{delayTimer};
 
     const auto now = chrono::steady_clock::now();
 
     while (emergencyExit) {
-        auto currentTime = chrono::duration_cast<chrono::seconds>(chrono::steady_clock::now() - now);
+        auto currentTime = chrono::duration_cast<chrono::milliseconds>(chrono::steady_clock::now() - now);
+
 
         if (currentTime >= timerDuration) {
             break;
-        }else {
-            this_thread::sleep_for(chrono::milliseconds(100));
+        } else {
+            if (timeRemaining != nullptr) {
+                auto remaining = timerDuration - currentTime;
+                *timeRemaining = chrono::duration_cast<chrono::seconds>(remaining);
+            }
+
+            this_thread::sleep_for(chrono::milliseconds(30));
         }
     }
 }
 
-// void delay(int delayTimer, const std::atomic<bool> &emergencyExit) {
-//     // If timer is 0, we should still wait a tiny bit or exit
-//     if (delayTimer <= 0) return;
-//
-//     // Target duration in milliseconds for better precision
-//     const auto targetMs = chrono::milliseconds(delayTimer * 1000);
-//     const auto startTime = chrono::steady_clock::now();
-//
-//     while (emergencyExit) {
-//         auto elapsed = chrono::steady_clock::now() - startTime;
-//
-//         if (elapsed >= targetMs) {
-//             break;
-//         }
-//
-//         // Sleep in small chunks so we can check 'emergencyExit' frequently
-//         this_thread::sleep_for(chrono::milliseconds(50));
-//     }
-// }
-
-
 void Traffic::trafficLoop() {
-    int counter = 0;
     while (running) {
         populate(speedLimit);
 
-        delay(1, running);
-
-        counter++;
-
-        if (counter % 15 == 0) {
-            cout << counter << endl;
-        }
+        //90 chosen because 85 is highest speed, speedMultiplier max is 5
+        //90 = 85 + 5, this stops from the int rounding to 0 and having a 0 second delay
+        delay((90 - speedLimit) / speedMultiplier, running, nullptr);
     }
-
-    cout << counter << " Cars \n";
 }
-
-// void Traffic::trafficLightsLoop() {
-//     // chrono::seconds startTime;
-//
-//     auto start = chrono::steady_clock::now();
-//     // auto startTime = chrono::duration_cast<chrono::seconds>(start.time_since_epoch());
-//     chrono::seconds startTime = static_cast<chrono::seconds>(0);
-//
-//     northSouthLight.currentLight = greenLight;
-//     cout << "northSouthLight is green, eastWestLight is red. \n";
-//
-//     while (running) {
-//         // chrono::seconds currentTime;
-//         auto now = chrono::steady_clock::now();
-//
-//         auto currentTime = chrono::duration_cast<chrono::seconds>(now - start);
-//
-//         // cout<<currentTime<<endl;
-//
-//         if (currentTime >= startTime + northSouthLight.greenLightTime && northSouthLight.currentLight == greenLight) {
-//             northSouthLight.currentLight = redLight;
-//             eastWestLight.currentLight = greenLight;
-//
-//             cout << "northSouthLight is red, eastWestLight is green. \n";
-//
-//             startTime = currentTime;
-//         }else if (currentTime >= startTime + eastWestLight.greenLightTime && eastWestLight.currentLight == greenLight) {
-//             eastWestLight.currentLight = redLight;
-//             northSouthLight.currentLight = greenLight;
-//
-//             cout << "northSouthLight is green, eastWestLight is red. \n";
-//
-//
-//             startTime = currentTime;
-//         }
-//     }
-// }
 
 void Traffic::trafficLightsLoop() {
 
+    //start on green initially
     northSouthLight.currentLight = greenLight;
-    cout << "northSouthLight is green, eastWestLight is red. \n";
-
 
     while (running) {
         auto timerDuration = (northSouthLight.currentLight == greenLight)
                                  ? northSouthLight.greenLightTime
                                  : eastWestLight.greenLightTime;
 
-        delay(timerDuration, running);
+        //multiplying the timerDuration by 10 turns it to seconds in the delay function
+        delay(timerDuration * 10 / speedMultiplier, running, &greenLightTimeRemaining);
 
-
+        //flips green to red, red to green
         if (northSouthLight.currentLight == greenLight) {
             northSouthLight.currentLight = redLight;
             eastWestLight.currentLight = greenLight;
-
-            cout << "northSouthLight is red, eastWestLight is green. \n";
-
         } else if (eastWestLight.currentLight == greenLight) {
             eastWestLight.currentLight = redLight;
             northSouthLight.currentLight = greenLight;
-
-            cout << "northSouthLight is green, eastWestLight is red. \n";
-
         }
     }
 }
 
 uint8_t Traffic::checkActiveLane() {
-    for (TrafficLight *light : lightsVector) {
+    for (TrafficLight *light: lightsVector) {
         if (light->currentLight == greenLight) {
             return light->headingID;
         }
@@ -148,193 +87,63 @@ uint8_t Traffic::checkActiveLane() {
     return 100;
 }
 
-//change all the headings vectors to deque so that you can use deque.pop_front(), its faster and better than vector.erase(vector.begin()).
-// void Traffic::popVehicles(vector<unique_ptr<Vehicles>> &headingVector, int numberOfLanes, string direction) {
-void Traffic::popVehicles(deque<unique_ptr<Vehicles>> &headingVector, uint8_t numberOfLanes, string direction) {
-    for (uint8_t i=0; i<numberOfLanes; i++) {
+void Traffic::popVehicles(deque<unique_ptr<Vehicles> > &headingVector, uint8_t numberOfLanes, string direction) {
+    for (uint8_t i = 0; i < numberOfLanes; i++) {
         if (!headingVector.empty()) {
-            // headingVector.pop_back();
-            // headingVector.erase(headingVector.begin());
             headingVector.pop_front();
-            cout<<"popped "<<direction<<"\n";
-        }else {
+        } else {
             break;
         }
     }
 }
 
 void Traffic::passVehiclesThroughIntersection() {
-
     while (running) {
+        delay(1, running, nullptr);
 
-        delay(1, running);
-
-        uint8_t currentHeading = checkActiveLane();
+        const uint8_t currentHeading = checkActiveLane();
         switch (currentHeading) {
             case northSouth: {
-                //for loops added because if x lanes, x amount of cars at the front that go.
-                // for (int i=0; i<northBoundLanes; i++) {
-                //   if (!northHeaded.empty()){
-                //     northHeaded.pop_back();
-                //     cout<<"popped North \n";
-                //   }else {
-                //       break;
-                //   }
-                // }
-                //
-                // for (int i=0; i<southBoundLanes;i++){
-                //     if (!southHeaded.empty()) {
-                //         southHeaded.pop_back();
-                //         cout<<"popped South \n";
-                //     }else {
-                //         break;
-                //     }
-                // }
-
                 popVehicles(northHeaded, northBoundLanes, "North");
                 popVehicles(southHeaded, southBoundLanes, "South");
 
                 break;
             }
             case eastWest: {
-                // for (int i=0; i<eastBoundLanes; i++){
-                //     if (!eastHeaded.empty() ){
-                //         eastHeaded.pop_back();
-                //         cout<<"popped East \n";
-                //     }else {
-                //         break;
-                //     }
-                // }
-                //
-                // for (int i=0; i<westBoundLanes; i++){
-                //     if (!westHeaded.empty()){
-                //         westHeaded.pop_back();
-                //         cout<<"popped West \n";
-                //     }else {
-                //         break;
-                //     }
-                // }
-
                 popVehicles(eastHeaded, eastBoundLanes, "East");
                 popVehicles(westHeaded, westBoundLanes, "West");
 
                 break;
             }
         }
-
     }
-
 }
 
 void Traffic::addLights() {
     lightsVector.push_back(&northSouthLight);
-    lightsVector.push_back(&northSouthTurnLight);
 
     lightsVector.push_back(&eastWestLight);
-    lightsVector.push_back(&eastWestTurnLight);
 }
 
 uint8_t checkUserInput(int userInput) {
     if (userInput >= 3) {
         userInput = 3;
-    }else if (userInput < 0){
+    } else if (userInput < 0) {
         userInput = 0;
     }
 
     return static_cast<uint8_t>(userInput);
 }
 
-// void createIntersection(Traffic &intersection) {
-//     int userInput = 0;
-//
-//     cout << "North bound";
-//     cin >> userInput;
-//     // checkUserInput(userInput);
-//     // intersection.northBoundLanes = static_cast<uint8_t>(userInput);
-//
-//     intersection.northBoundLanes = checkUserInput(userInput);
-//
-//
-//     //
-//     // cout<<"North left turn lanes";
-//     // cin >> userInput;
-//     // intersection.northLeftTurnLanes = userInput;
-//     //
-//     // cout<<"North right turn lanes";
-//     // cin >> userInput;
-//     // intersection.northRightTurnLanes = userInput;
-//
-//     cout << "East bound";
-//     cin >> userInput;
-//     // checkUserInput(userInput);
-//     // intersection.eastBoundLanes = userInput;
-//     intersection.eastBoundLanes = checkUserInput(userInput);
-//
-//     // cout<<"East left turn lanes";
-//     // cin >> userInput;
-//     // intersection.eastLeftTurnLanes = userInput;
-//     // cout<<"East right turn lanes";
-//     // cin >> userInput;
-//     // intersection.eastRightTurnLanes = userInput;
-//
-//
-//     cout << "South bound";
-//     cin >> userInput;
-//     // checkUserInput(userInput);
-//     // intersection.southBoundLanes = userInput;
-//     intersection.southBoundLanes = checkUserInput(userInput);
-//
-//     // cout<<"South left turn lanes";
-//     // cin >> userInput;
-//     // intersection.southLeftTurnLanes = userInput;
-//     // cout<<"South right turn lanes";
-//     // cin >> userInput;
-//     // intersection.southRightTurnLanes = userInput;
-//
-//     cout << "West bound";
-//     cin >> userInput;
-//     // checkUserInput(userInput);
-//     // intersection.westBoundLanes = userInput;
-//     intersection.westBoundLanes = checkUserInput(userInput);
-//
-//     // cout<<"West left turn lanes";
-//     // cin >> userInput;
-//     // intersection.westLeftTurnLanes = userInput;
-//     // cout<<"West right turn lanes";
-//     // cin >> userInput;
-//     // intersection.westRightTurnLanes = userInput;
-//
-//     cout << "North South Light timer: ";
-//     cin >> userInput;
-//     // checkUserInput(userInput);
-//     // intersection.northSouthLight.greenLightTime = static_cast<chrono::seconds>(userInput);
-//     //clamping because uint8_t holde 1-255
-//     intersection.northSouthLight.greenLightTime = clamp(userInput,1,255);
-//
-//
-//     cout << "East West Light timer: ";
-//     cin >> userInput;
-//     // checkUserInput(userInput);
-//     // intersection.eastWestLight.greenLightTime = static_cast<chrono::seconds>(userInput);
-//     //clamping because uint8_t holde 1-255
-//     intersection.eastWestLight.greenLightTime = clamp(userInput,1,255);
-//
-//     intersection.addLights();
-//
-//     cout << "Speed Limit: ";
-//     cin >> userInput;
-//     intersection.speedLimit = clamp(userInput,1,255);
-// }
+void createIntersection(Traffic &intersection, const uint8_t northSouthLanes, const uint8_t eastWestLanes,
+                        const uint8_t speed, const uint8_t northSouthLightTimer, const uint8_t eastWestLightTimer) {
+    intersection.northBoundLanes = checkUserInput(northSouthLanes);
 
-void createIntersection(Traffic &intersection, uint8_t lanes, uint8_t speed, uint8_t northSouthLightTimer, uint8_t eastWestLightTimer){
+    intersection.southBoundLanes = checkUserInput(northSouthLanes);
 
-    intersection.northBoundLanes = checkUserInput(lanes);
+    intersection.eastBoundLanes = checkUserInput(eastWestLanes);
 
-    intersection.eastBoundLanes = checkUserInput(lanes);
-
-    intersection.southBoundLanes = checkUserInput(lanes);
-
-    intersection.westBoundLanes = checkUserInput(lanes);
+    intersection.westBoundLanes = checkUserInput(eastWestLanes);
 
     intersection.northSouthLight.greenLightTime = northSouthLightTimer;
 
@@ -348,29 +157,21 @@ void createIntersection(Traffic &intersection, uint8_t lanes, uint8_t speed, uin
 
 void printIntersection(const Traffic &intersection) {
     cout << "North bound " << intersection.northBoundLanes << "\n";
-    cout << "North left turn lanes " << intersection.northLeftTurnLanes << "\n";
-    cout << "North right turn lanes " << intersection.northRightTurnLanes << "\n";
     for (const auto &vehicle: northHeaded) {
         vehicle->print();
     }
 
     cout << "East bound " << intersection.eastBoundLanes << "\n";
-    cout << "East left turn lanes " << intersection.eastLeftTurnLanes << "\n";
-    cout << "East right turn lanes " << intersection.eastRightTurnLanes << "\n";
     for (const auto &vehicle: eastHeaded) {
         vehicle->print();
     }
 
     cout << "South bound " << intersection.southBoundLanes << "\n";
-    cout << "South left turn lanes " << intersection.southLeftTurnLanes << "\n";
-    cout << "South right turn lanes " << intersection.southRightTurnLanes << "\n";
     for (const auto &vehicle: southHeaded) {
         vehicle->print();
     }
 
     cout << "West bound " << intersection.westBoundLanes << "\n";
-    cout << "West left turn lanes " << intersection.westLeftTurnLanes << "\n";
-    cout << "West right turn lanes " << intersection.westRightTurnLanes << "\n";
     for (const auto &vehicle: westHeaded) {
         vehicle->print();
     }
