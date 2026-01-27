@@ -4,6 +4,8 @@
 // Description: Main driver for the TrafficSimulator. Manages the GLFW/ImGui
 //              lifecycle, spawns simulation threads, and coordinates the
 //              rendering of UI components.
+//
+// Credits: Uses Dear ImGui for the UI layer.
 //********************************************
 
 #include <iostream>
