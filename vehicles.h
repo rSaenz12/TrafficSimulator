@@ -1,6 +1,10 @@
-//
-// Created by rusty on 11/3/2025.
-//
+//********************************************
+// Author: Russell Saenz
+// File: vehicles.h
+// Description: Declares Vehicle class and its child classes (Sedan, MiniVan, PickupTruck, SportsCar).
+//              Declares functions useLock, populate, deques for NSEW directions, the mutex locks for the deques,
+//              and atomic variables for tracking program stats
+//********************************************
 
 #pragma once
 
@@ -13,7 +17,7 @@
 #include <mutex>
 #include <functional>
 
-//directions and their indexes
+//directions and their IDs
 constexpr uint8_t northSouth = 0;
 constexpr uint8_t south = 0;
 constexpr uint8_t eastWest = 2;
@@ -110,13 +114,13 @@ public:
     }
 
     //print
-    void print() {
-        std::cout << "Speed: " << currentSpeed << std::endl;
-        std::cout << "Passengers:  " << passengers << std::endl;
-        std::cout << "Intoxicated: " << intoxicated << std::endl;
-        std::cout << "Distracted: " << distracted << std::endl;
-        std::cout << "Direction: " << heading << std::endl;
-        std::cout << std::endl;
+    virtual void print() {
+        std::cout << "Speed: " << static_cast<int>(currentSpeed) << "\n";
+        std::cout << "Passengers:  " << static_cast<int>(passengers) << "\n";
+        std::cout << "Intoxicated: " << static_cast<int>(intoxicated) << "\n";
+        std::cout << "Distracted: " << static_cast<int>(distracted) << "\n";
+        std::cout << "Direction: " << static_cast<int>(heading) << "\n";
+        std::cout << "\n";
     }
 
     void createVehicles(uint8_t speed, bool isIntoxicated, bool isDistracted, uint8_t direction);
@@ -138,7 +142,7 @@ public:
         seats = 5;
     }
 
-    void print() {
+    void print() override{
         std::cout << "Sedan" << std::endl;
         Vehicles::print();
     }
@@ -156,7 +160,7 @@ public:
         seats = 5;
     }
 
-    void print() {
+    void print() override{
         std::cout << "Pickup Truck" << std::endl;
         Vehicles::print();
     }
@@ -174,7 +178,7 @@ public:
         seats = 7;
     }
 
-    void print() {
+    void print() override{
         std::cout << "Mini van" << std::endl;
         Vehicles::print();
     }
@@ -192,35 +196,31 @@ public:
         seats = 2;
     }
 
-    void print() {
+    void print() override{
         std::cout << "Sports Car" << std::endl;
         Vehicles::print();
     }
 };
 
+//checks if deque is being written or read
 void useLock(std::mutex &dequeMutex, const std::function<void()> &func);
 
+//creates vehicles
 void populate(uint8_t speedLimit);
 
-
+//deques hold vehicles going in certain directions
 extern std::deque<std::unique_ptr<Vehicles>> northHeaded; //1
 extern std::deque<std::unique_ptr<Vehicles>> eastHeaded; //2
 extern std::deque<std::unique_ptr<Vehicles>> southHeaded; //3
 extern std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
 
+//locks for deques
 extern std::mutex northMutex;
 extern std::mutex southMutex;
 extern std::mutex eastMutex;
 extern std::mutex westMutex;
 
-// extern uint8_t intoxicatedDrivers;
-// extern uint8_t distractedDrivers;
-// extern uint8_t crashes;
-// extern uint16_t totalDrivers;
-// extern uint16_t totalPassengers;
-// extern uint32_t totalWeight;
-// extern uint32_t totalSpeed;
-
+//these hold totals for whole program
 extern std::atomic<uint8_t > intoxicatedDrivers;
 extern std::atomic<uint8_t > distractedDrivers;
 extern std::atomic<uint8_t > crashes;

@@ -1,19 +1,24 @@
-//
-// Created by rusty on 11/5/2025.
-//
+//********************************************
+// Author: Russell Saenz
+// File: traffic.h
+// Description: Declares TrafficLight and Traffic classes.
+//              Declares functions checkUserInput, createIntersection, printIntersection, and delay
+//              Declares greenLightTimeRemaining variable
+//********************************************
 
-#ifndef TRAFFICSIMULATOR_TRAFFIC_H
-#define TRAFFICSIMULATOR_TRAFFIC_H
+#pragma once
 
 #include <atomic>
 #include <chrono>
 
 #include "vehicles.h"
 
+//used in tandem with TrafficLight
 constexpr bool greenLight = true;
 constexpr bool redLight = false;
 
 using namespace std;
+
 
 struct TrafficLight {
     uint8_t greenLightTime = 0;
@@ -33,21 +38,19 @@ struct TrafficLight {
 };
 
 struct Traffic {
-    uint8_t speedMultiplier = 1;
-
-    uint8_t speedLimit = 0;
     std::vector<TrafficLight *> lightsVector;
 
     TrafficLight northSouthLight{northSouth};
-
-    uint8_t northBoundLanes = 0;
-
     TrafficLight eastWestLight{eastWest};
 
+    //set to 1 as default for regular speed
+    uint8_t speedMultiplier = 1;
+
+    uint8_t speedLimit = 0;
+
+    uint8_t northBoundLanes = 0;
     uint8_t eastBoundLanes = 0;
-
     uint8_t southBoundLanes = 0;
-
     uint8_t westBoundLanes = 0;
 
     std::atomic<bool> running{false};
@@ -60,11 +63,9 @@ struct Traffic {
 
     uint8_t checkActiveLane();
 
-    std::atomic<bool> goThroughLight{false};
-
     void passVehiclesThroughIntersection();
 
-    void popVehicles(std::deque<std::unique_ptr<Vehicles> > &headingVector, uint8_t numberOfLanes, string direction);
+    void popVehicles(deque<unique_ptr<Vehicles>> &headingVector, uint8_t numberOfLanes);
 };
 
 uint8_t checkUserInput(int userInput);
@@ -78,5 +79,3 @@ void delay(int delayTimer, bool emergencyExit, std::chrono::seconds *timeRemaini
 
 extern std::chrono::seconds greenLightTimeRemaining;
 
-
-#endif //TRAFFICSIMULATOR_TRAFFIC_H

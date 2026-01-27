@@ -1,6 +1,8 @@
-//
-// Created by rusty on 11/3/2025.
-//
+//********************************************
+// Author: Russell Saenz
+// File: vehicles.cpp
+// Description: Handles creating Vehicle Objects, and the useLock function
+//********************************************
 
 #include <iostream>
 #include "vehicles.h"
@@ -20,31 +22,18 @@ std::mutex southMutex;
 std::mutex eastMutex;
 std::mutex westMutex;
 
-// //totals of sim
-// uint8_t intoxicatedDrivers = 0;
-// uint8_t distractedDrivers = 0;
-// uint8_t crashes = 0;
-//
-// //also doubles as total cars
-// uint16_t totalDrivers = 0;
-// uint16_t totalPassengers = 0;
-// uint32_t totalWeight = 0;
-//
-// //will be used a totalSpeed/totalDrivers = average speed
-// uint32_t totalSpeed = 0;
-
 //totals of sim
-atomic<uint8_t> intoxicatedDrivers {0};
-atomic<uint8_t> distractedDrivers {0};
-atomic<uint8_t> crashes {0};
+atomic<uint8_t> intoxicatedDrivers{0};
+atomic<uint8_t> distractedDrivers{0};
+atomic<uint8_t> crashes{0};
 
 //also doubles as total cars
-atomic<uint16_t> totalDrivers {0};
-atomic<uint16_t> totalPassengers {0};
-atomic<uint32_t> totalWeight {0};
+atomic<uint16_t> totalDrivers{0};
+atomic<uint16_t> totalPassengers{0};
+atomic<uint32_t> totalWeight{0};
 
 //will be used a totalSpeed/totalDrivers = average speed
-atomic<uint32_t> totalSpeed {0};
+atomic<uint32_t> totalSpeed{0};
 
 
 void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, const bool isDistracted,
@@ -57,7 +46,7 @@ void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, con
     setHeading(direction);
 
     //updating totals
-    totalDrivers ++;
+    totalDrivers++;
     //taking advantage of bool being 1 or 0
     intoxicatedDrivers += intoxicated;
     distractedDrivers += distracted;
@@ -71,7 +60,6 @@ void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, con
 //checks if a car is crashing
 //uses a combination of factors to calculate probability
 bool Vehicles::crashDetection(const uint8_t speedLimit) {
-
     double crashChance = 0.5;
 
     const double risk = (rand() % 1000) / 10.0;
@@ -88,7 +76,7 @@ bool Vehicles::crashDetection(const uint8_t speedLimit) {
         crashChance *= 2.0;
     }
 
-    return  risk <= crashChance;
+    return risk <= crashChance;
 }
 
 void useLock(mutex &dequeMutex, const function<void()> &func) {
@@ -98,7 +86,6 @@ void useLock(mutex &dequeMutex, const function<void()> &func) {
 }
 
 void populate(const uint8_t speedLimit) {
-
     const int carType = rand() % 100;
     const int speedFactor = rand() % 100;
     int speed = 0;
@@ -163,7 +150,6 @@ void populate(const uint8_t speedLimit) {
 
     switch (heading) {
         case 1: {
-
             useLock(northMutex, [&] {
                 northHeaded.push_back(move(vehicle));
             });
@@ -171,7 +157,6 @@ void populate(const uint8_t speedLimit) {
             break;
         }
         case 2: {
-
             useLock(eastMutex, [&] {
                 eastHeaded.push_back(move(vehicle));
             });
@@ -179,7 +164,6 @@ void populate(const uint8_t speedLimit) {
             break;
         }
         case 3: {
-
             useLock(southMutex, [&] {
                 southHeaded.push_back(move(vehicle));
             });
@@ -187,7 +171,6 @@ void populate(const uint8_t speedLimit) {
             break;
         }
         case 4: {
-
             useLock(westMutex, [&] {
                 westHeaded.push_back(move(vehicle));
             });

@@ -1,3 +1,11 @@
+//********************************************
+// Author: Russell Saenz
+// File: main.cpp
+// Description: Main driver for the TrafficSimulator. Manages the GLFW/ImGui
+//              lifecycle, spawns simulation threads, and coordinates the
+//              rendering of UI components.
+//********************************************
+
 #include <iostream>
 
 #include <chrono>
@@ -43,17 +51,24 @@ double getMemoryUsageMB() {
 int main() {
     srand(time(nullptr));
 
+    Traffic intersection;
+
     thread trafficThread;
     thread trafficLights;
     thread runningTraffic;
 
-    Traffic intersection;
 
 
-    if (!glfwInit()) return 1;
+
+    if (!glfwInit()) {
+        return 1;
+    }
 
     GLFWwindow *window = glfwCreateWindow(1280, 720, "Traffic Simulation", nullptr, nullptr);
-    if (!window) return 1;
+
+    if (!window) {
+        return 1;
+    }
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1);
 
@@ -62,7 +77,8 @@ int main() {
     ImGuiIO &io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 
-    const ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
+    //settings for docked windows in the ui
+    const ImGuiWindowFlags windowFlags = ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoResize |
                                     ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav |
                                     ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoScrollbar |
                                     ImGuiWindowFlags_NoScrollWithMouse | ImGuiWindowFlags_NoCollapse;
@@ -70,6 +86,7 @@ int main() {
     ImGui_ImplGlfw_InitForOpenGL(window, true);
     ImGui_ImplOpenGL3_Init("#version 130");
 
+    //user interacted variables
     int northSouthLanes = 3;
     int eastWestLanes = 3;
 
@@ -87,36 +104,33 @@ int main() {
 
         ImGui::DockSpaceOverViewport();
 
-
+        //these run during the set up screen
         if (!intersection.running) {
 
-            setupMenu(window_flags, intersection, northSouthLanes, eastWestLanes, speed, northSouthLightTimer, eastWestLightTimer);
+            setupMenu(windowFlags, intersection, northSouthLanes, eastWestLanes, speed, northSouthLightTimer, eastWestLightTimer);
 
 
            ImGui::Begin ("Begin Simulation");
-           if (ImGui::Button("Begin", ImVec2(100,50))) {
+               if (ImGui::Button("Begin", ImVec2(100,50))) {
 
-               createIntersection(intersection, static_cast<uint8_t>(northSouthLanes), static_cast<uint8_t>(eastWestLanes), static_cast<uint8_t>(speed), static_cast<uint8_t>(northSouthLightTimer), static_cast<uint8_t>(eastWestLightTimer));
+                   createIntersection(intersection, static_cast<uint8_t>(northSouthLanes), static_cast<uint8_t>(eastWestLanes), static_cast<uint8_t>(speed), static_cast<uint8_t>(northSouthLightTimer), static_cast<uint8_t>(eastWestLightTimer));
 
-               intersection.running = true;
-               trafficThread = thread(&Traffic::trafficLoop, &intersection);
-               trafficLights = thread(&Traffic::trafficLightsLoop, &intersection);
-               runningTraffic = thread(&Traffic::passVehiclesThroughIntersection, &intersection);
-
-           }
-
+                   intersection.running = true;
+                   trafficThread = thread(&Traffic::trafficLoop, &intersection);
+                   trafficLights = thread(&Traffic::trafficLightsLoop, &intersection);
+                   runningTraffic = thread(&Traffic::passVehiclesThroughIntersection, &intersection);
+               }
            ImGui::End();
-
         }
 
-
         //ACTUAL ROAD WINDOW
-        buildRoad(northSouthLanes, eastWestLanes, window_flags, intersection);
+        buildRoad(northSouthLanes, eastWestLanes, windowFlags, intersection);
 
+        //these are the second screen
         if (intersection.running){
-            drawTrafficLightState(window_flags, intersection);
-            displayStats(window_flags, intersection);
-            speedSlider(window_flags, intersection);
+            drawTrafficLightState(windowFlags, intersection);
+            displayStats(windowFlags, intersection);
+            speedSlider(windowFlags, intersection);
 
 
             //****************************** Performance measure
@@ -133,7 +147,6 @@ int main() {
                 ImGui::PlotLines("Memory Leak Check", memHistory, 100, offset, nullptr, 0.0f, 500.0f, ImVec2(0, 80));
             ImGui::End();
             //****************************** Performance measure
-
         }
 
         ImGui::Render();
@@ -147,6 +160,7 @@ int main() {
         glfwSwapBuffers(window);
     }
 
+    //ending the run loops causing threads to return
     intersection.running = false;
 
     trafficThread.join();
@@ -156,12 +170,12 @@ int main() {
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
+
     glfwDestroyWindow(window);
     glfwTerminate();
 
-    cout<<"Car total: "<< totalDrivers<<"\n";
-
-
+    //console debug output
+    // cout<<"Car total: "<< totalDrivers<<"\n";
     // printIntersection(intersection);
     return 0;
 }
