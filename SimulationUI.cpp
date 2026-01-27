@@ -43,8 +43,8 @@ void setupMenu(const ImGuiWindowFlags window_flags, Traffic &intersection, int &
     speedSlider(window_flags, intersection);
 }
 
-void buildRoad(const int northSouthLanes, const int eastWestLanes, const ImGuiWindowFlags window_flags, Traffic &intersection) {
-
+void buildRoad(const int northSouthLanes, const int eastWestLanes, const ImGuiWindowFlags window_flags,
+               Traffic &intersection) {
     SetNextWindowPos(ImVec2(250, 50), ImGuiCond_FirstUseEver);
     SetNextWindowSize(ImVec2(800, 600), ImGuiCond_FirstUseEver);
 
@@ -81,9 +81,11 @@ void buildRoad(const int northSouthLanes, const int eastWestLanes, const ImGuiWi
 
     //yellow center lines
     ImU32 yellow = IM_COL32(255, 255, 0, 255);
-    drawDashedLine(draw_list, ImVec2(canvasPosition0.x, centerY), horizontalVoid, ImVec2(canvasPosition1.x, centerY), yellow, 2.5f,
+    drawDashedLine(draw_list, ImVec2(canvasPosition0.x, centerY), horizontalVoid, ImVec2(canvasPosition1.x, centerY),
+                   yellow, 2.5f,
                    0.0f); // Solid
-    drawDashedLine(draw_list, ImVec2(centerX, canvasPosition0.y), verticalVoid, ImVec2(centerX, canvasPosition1.y), yellow, 2.5f,
+    drawDashedLine(draw_list, ImVec2(centerX, canvasPosition0.y), verticalVoid, ImVec2(centerX, canvasPosition1.y),
+                   yellow, 2.5f,
                    0.0f); // Solid
 
     //white lines
@@ -156,9 +158,28 @@ void drawTrafficGraphics(ImDrawList *draw_list, int northSouthLanes, int eastWes
 
     int currentSize = 0;
 
+    int northHeadedSize;
+    useLock(northMutex, [&] {
+        northHeadedSize = northHeaded.size();
+    });
 
-    if (northHeaded.size() > 0) {
-        currentSize = ceil(northHeaded.size() / northSouthLanes);
+    int southHeadedSize;
+    useLock(southMutex, [&] {
+        southHeadedSize = southHeaded.size();
+    });
+
+    int eastHeadedSize;
+    useLock(eastMutex, [&] {
+        eastHeadedSize = eastHeaded.size();
+    });
+
+    int westHeadedSize;
+    useLock(westMutex, [&] {
+        westHeadedSize = westHeaded.size();
+    });
+
+    if (northHeadedSize > 0) {
+        currentSize = ceil(northHeadedSize / northSouthLanes);
 
         if (currentSize >= 10) {
             currentColor = red;
@@ -173,8 +194,8 @@ void drawTrafficGraphics(ImDrawList *draw_list, int northSouthLanes, int eastWes
                                  currentColor);
     }
 
-    if (southHeaded.size() > 0) {
-        currentSize = ceil(southHeaded.size() / northSouthLanes);
+    if (southHeadedSize > 0) {
+        currentSize = ceil(southHeadedSize / northSouthLanes);
 
         if (currentSize >= 10) {
             currentColor = red;
@@ -189,8 +210,8 @@ void drawTrafficGraphics(ImDrawList *draw_list, int northSouthLanes, int eastWes
                                  currentColor);
     }
 
-    if (eastHeaded.size() > 0) {
-        currentSize = ceil(eastHeaded.size() / eastWestLanes);
+    if (eastHeadedSize > 0) {
+        currentSize = ceil(eastHeadedSize / eastWestLanes);
 
 
         if (currentSize >= 10) {
@@ -206,8 +227,8 @@ void drawTrafficGraphics(ImDrawList *draw_list, int northSouthLanes, int eastWes
                                  currentColor);
     }
 
-    if (westHeaded.size() > 0) {
-        currentSize = ceil(westHeaded.size() / eastWestLanes);
+    if (westHeadedSize > 0) {
+        currentSize = ceil(westHeadedSize / eastWestLanes);
 
         if (currentSize >= 10) {
             currentColor = red;
@@ -296,34 +317,57 @@ void drawDashedLine(ImDrawList *draw_list, const ImVec2 start, const ImVec2 void
 }
 
 void displayStats(const ImGuiWindowFlags window_flags, const Traffic &intersection) {
+    int northHeadedSize;
+    useLock(northMutex, [&] {
+        northHeadedSize = northHeaded.size();
+    });
+
+    int southHeadedSize;
+    useLock(southMutex, [&] {
+        southHeadedSize = southHeaded.size();
+    });
+
+    int eastHeadedSize;
+    useLock(eastMutex, [&] {
+        eastHeadedSize = eastHeaded.size();
+    });
+
+    int westHeadedSize;
+    useLock(westMutex, [&] {
+        westHeadedSize = westHeaded.size();
+    });
+
     Begin("Traffic Stats", nullptr, window_flags);
-    Text("Speed Limit: %d MPH", intersection.speedLimit);
+    Text("Speed Limit: %u MPH", intersection.speedLimit);
 
-    Text("North/South Light Duration: %d seconds", intersection.northSouthLight.greenLightTime);
+    Text("North/South Light Duration: %u seconds", intersection.northSouthLight.greenLightTime);
 
-    Text("East/West Light Duration: %d seconds", intersection.eastWestLight.greenLightTime);
+    Text("East/West Light Duration: %u seconds", intersection.eastWestLight.greenLightTime);
 
-    Text("Cars Headed North: %d", northHeaded.size());
+    Text("Cars Headed North: %d", northHeadedSize);
 
-    Text("Cars Headed South: %d", southHeaded.size());
+    Text("Cars Headed South: %d", southHeadedSize);
 
-    Text("Cars Headed East: %d", eastHeaded.size());
+    Text("Cars Headed East: %d", eastHeadedSize);
 
-    Text("Cars Headed West: %d", westHeaded.size());
+    Text("Cars Headed West: %d", westHeadedSize);
 
-    Text("Total Vehicles: %d", totalDrivers);
+    Text("Total Vehicles: %u", totalDrivers.load());
 
-    Text("Intoxicated Drivers: %d", intoxicatedDrivers);
+    Text("Intoxicated Drivers: %u", intoxicatedDrivers.load());
 
-    Text("Distracted Drivers: %d", distractedDrivers);
+    Text("Distracted Drivers: %u", distractedDrivers.load());
 
-    Text("Accidents: %d", crashes);
+    Text("Accidents: %u", crashes.load());
 
-    Text("Total Passengers: %d, Passengers per Vehicle: %d ", totalPassengers, static_cast<int>(totalPassengers / totalDrivers));
+    //added inline if to avoid dividing by 0
+    Text("Total Passengers: %u, Passengers per Vehicle: %d ", totalPassengers.load(),
+         static_cast<int>(totalPassengers.load() / (totalDrivers.load() == 0 ? 1 : totalDrivers.load())));
 
-    Text("Total Weight of Vehicles: %d lbs, Average Vehicle Weight: %d lbs", totalWeight, static_cast<int>(totalWeight / totalDrivers));
+    Text("Total Weight of Vehicles: %u lbs, Average Vehicle Weight: %d lbs", totalWeight.load(),
+         static_cast<int>(totalWeight / (totalDrivers.load() == 0 ? 1 : totalDrivers.load())));
 
-    Text("Average Speed of Vehicles: %d MPH", static_cast<int>(totalSpeed / totalDrivers));
+    Text("Average Speed of Vehicles: %d MPH", static_cast<int>(totalSpeed.load() / totalDrivers.load()));
 
     End();
 }

@@ -9,6 +9,9 @@
 #include <vector>
 #include <memory>
 #include <deque>
+#include <atomic>
+#include <mutex>
+#include <functional>
 
 //directions and their indexes
 constexpr uint8_t northSouth = 0;
@@ -195,18 +198,33 @@ public:
     }
 };
 
+void useLock(std::mutex &dequeMutex, const std::function<void()> &func);
+
 void populate(uint8_t speedLimit);
 
 
-extern std::deque<std::unique_ptr<Vehicles> > northHeaded; //1
-extern std::deque<std::unique_ptr<Vehicles> > eastHeaded; //2
-extern std::deque<std::unique_ptr<Vehicles> > southHeaded; //3
-extern std::deque<std::unique_ptr<Vehicles> > westHeaded; //4
+extern std::deque<std::unique_ptr<Vehicles>> northHeaded; //1
+extern std::deque<std::unique_ptr<Vehicles>> eastHeaded; //2
+extern std::deque<std::unique_ptr<Vehicles>> southHeaded; //3
+extern std::deque<std::unique_ptr<Vehicles>> westHeaded; //4
 
-extern uint8_t intoxicatedDrivers;
-extern uint8_t distractedDrivers;
-extern uint8_t crashes;
-extern uint16_t totalDrivers;
-extern uint16_t totalPassengers;
-extern uint32_t totalWeight;
-extern uint32_t totalSpeed;
+extern std::mutex northMutex;
+extern std::mutex southMutex;
+extern std::mutex eastMutex;
+extern std::mutex westMutex;
+
+// extern uint8_t intoxicatedDrivers;
+// extern uint8_t distractedDrivers;
+// extern uint8_t crashes;
+// extern uint16_t totalDrivers;
+// extern uint16_t totalPassengers;
+// extern uint32_t totalWeight;
+// extern uint32_t totalSpeed;
+
+extern std::atomic<uint8_t > intoxicatedDrivers;
+extern std::atomic<uint8_t > distractedDrivers;
+extern std::atomic<uint8_t > crashes;
+extern std::atomic<uint16_t> totalDrivers;
+extern std::atomic< uint16_t> totalPassengers;
+extern std::atomic<uint32_t> totalWeight;
+extern std::atomic<uint32_t> totalSpeed;

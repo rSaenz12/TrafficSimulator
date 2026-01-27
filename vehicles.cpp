@@ -6,6 +6,8 @@
 #include "vehicles.h"
 #include <random>
 
+#include <thread>
+
 using namespace std;
 
 std::deque<std::unique_ptr<Vehicles> > northHeaded; //1
@@ -13,18 +15,36 @@ std::deque<std::unique_ptr<Vehicles> > eastHeaded; //2
 std::deque<std::unique_ptr<Vehicles> > southHeaded; //3
 std::deque<std::unique_ptr<Vehicles> > westHeaded; //4
 
+std::mutex northMutex;
+std::mutex southMutex;
+std::mutex eastMutex;
+std::mutex westMutex;
+
+// //totals of sim
+// uint8_t intoxicatedDrivers = 0;
+// uint8_t distractedDrivers = 0;
+// uint8_t crashes = 0;
+//
+// //also doubles as total cars
+// uint16_t totalDrivers = 0;
+// uint16_t totalPassengers = 0;
+// uint32_t totalWeight = 0;
+//
+// //will be used a totalSpeed/totalDrivers = average speed
+// uint32_t totalSpeed = 0;
+
 //totals of sim
-uint8_t intoxicatedDrivers = 0;
-uint8_t distractedDrivers = 0;
-uint8_t crashes = 0;
+atomic<uint8_t> intoxicatedDrivers {0};
+atomic<uint8_t> distractedDrivers {0};
+atomic<uint8_t> crashes {0};
 
 //also doubles as total cars
-uint16_t totalDrivers = 0;
-uint16_t totalPassengers = 0;
-uint32_t totalWeight = 0;
+atomic<uint16_t> totalDrivers {0};
+atomic<uint16_t> totalPassengers {0};
+atomic<uint32_t> totalWeight {0};
 
 //will be used a totalSpeed/totalDrivers = average speed
-uint32_t totalSpeed = 0;
+atomic<uint32_t> totalSpeed {0};
 
 
 void Vehicles::createVehicles(const uint8_t speed, const bool isIntoxicated, const bool isDistracted,
@@ -69,6 +89,12 @@ bool Vehicles::crashDetection(const uint8_t speedLimit) {
     }
 
     return  risk <= crashChance;
+}
+
+void useLock(mutex &dequeMutex, const function<void()> &func) {
+    lock_guard lock(dequeMutex);
+
+    func();
 }
 
 void populate(const uint8_t speedLimit) {
@@ -137,19 +163,35 @@ void populate(const uint8_t speedLimit) {
 
     switch (heading) {
         case 1: {
-            northHeaded.push_back(move(vehicle));
+
+            useLock(northMutex, [&] {
+                northHeaded.push_back(move(vehicle));
+            });
+
             break;
         }
         case 2: {
-            eastHeaded.push_back(move(vehicle));
+
+            useLock(eastMutex, [&] {
+                eastHeaded.push_back(move(vehicle));
+            });
+
             break;
         }
         case 3: {
-            southHeaded.push_back(move(vehicle));
+
+            useLock(southMutex, [&] {
+                southHeaded.push_back(move(vehicle));
+            });
+
             break;
         }
         case 4: {
-            westHeaded.push_back(move(vehicle));
+
+            useLock(westMutex, [&] {
+                westHeaded.push_back(move(vehicle));
+            });
+
             break;
         }
     }

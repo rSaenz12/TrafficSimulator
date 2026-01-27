@@ -104,14 +104,24 @@ void Traffic::passVehiclesThroughIntersection() {
         const uint8_t currentHeading = checkActiveLane();
         switch (currentHeading) {
             case northSouth: {
-                popVehicles(northHeaded, northBoundLanes, "North");
-                popVehicles(southHeaded, southBoundLanes, "South");
+
+                useLock(northMutex, [&] {
+                    popVehicles(northHeaded, northBoundLanes, "North");
+                });
+                useLock(southMutex, [&] {
+                    popVehicles(southHeaded, southBoundLanes, "South");
+                });
 
                 break;
             }
             case eastWest: {
-                popVehicles(eastHeaded, eastBoundLanes, "East");
-                popVehicles(westHeaded, westBoundLanes, "West");
+
+                useLock(eastMutex, [&] {
+                    popVehicles(eastHeaded, eastBoundLanes, "East");
+                });
+                useLock(westMutex, [&] {
+                    popVehicles(westHeaded, westBoundLanes, "West");
+                });
 
                 break;
             }
