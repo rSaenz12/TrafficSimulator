@@ -126,7 +126,7 @@ int main() {
         //ACTUAL ROAD WINDOW
         buildRoad(northSouthLanes, eastWestLanes, windowFlags, intersection);
 
-        //these are the second screen
+        //these are the sim screen
         if (intersection.running){
             drawTrafficLightState(windowFlags, intersection);
             displayStats(windowFlags, intersection);
