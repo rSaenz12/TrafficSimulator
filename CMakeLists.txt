@@ -4,7 +4,7 @@ project(TrafficSimulator)
 set(CMAKE_CXX_STANDARD 20)
 
 #enable once ui is set and finished, it allows .ini to be copied from the main dir to the debug dir
-#configure_file(imgui.ini ${CMAKE_CURRENT_BINARY_DIR}/imgui.ini COPYONLY)
+configure_file(imgui.ini ${CMAKE_CURRENT_BINARY_DIR}/imgui.ini COPYONLY)
 
 # --- 1. AUTOMATICALLY DOWNLOAD GLFW ---
 include(FetchContent)
