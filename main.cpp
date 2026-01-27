@@ -9,11 +9,12 @@
 //********************************************
 
 #include <iostream>
-
 #include <chrono>
 #include <thread>
 #include <conio.h>
 #include <cmath>
+
+//imgui
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
@@ -21,16 +22,10 @@
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>
 
+//project headers
 #include "traffic.h"
 #include "vehicles.h"
 #include "SimulationUI.h"
-
-
-using namespace std;
-
-void delay(int delayTimer);
-
-
 
 
 //****************************** Performance measure
@@ -49,6 +44,9 @@ double getMemoryUsageMB() {
 //************************************
 
 
+using namespace std;
+
+void delay(int delayTimer);
 
 int main() {
     srand(time(nullptr));
@@ -58,9 +56,6 @@ int main() {
     thread trafficThread;
     thread trafficLights;
     thread runningTraffic;
-
-
-
 
     if (!glfwInit()) {
         return 1;
@@ -95,7 +90,6 @@ int main() {
     int speed = 45;
     int northSouthLightTimer = 5;
     int eastWestLightTimer = 5;
-
 
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
@@ -134,7 +128,6 @@ int main() {
             displayStats(windowFlags, intersection);
             speedSlider(windowFlags, intersection);
 
-
             //****************************** Performance measure
             ImGui::Begin("System Monitor");
                 double memUsed = getMemoryUsageMB();
@@ -148,7 +141,7 @@ int main() {
 
                 ImGui::PlotLines("Memory Leak Check", memHistory, 100, offset, nullptr, 0.0f, 500.0f, ImVec2(0, 80));
             ImGui::End();
-            //****************************** Performance measure
+            //******************************
         }
 
         ImGui::Render();
