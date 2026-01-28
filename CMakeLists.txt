@@ -1,12 +1,12 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.20)
 project(TrafficSimulator)
 
 set(CMAKE_CXX_STANDARD 20)
 
-#enable once ui is set and finished, it allows .ini to be copied from the main dir to the debug dir
+#allows .ini to be copied from the main dir to the debug dir
 configure_file(imgui.ini ${CMAKE_CURRENT_BINARY_DIR}/imgui.ini COPYONLY)
 
-# --- 1. AUTOMATICALLY DOWNLOAD GLFW ---
+#GLFW
 include(FetchContent)
 FetchContent_Declare(
         glfw
@@ -20,41 +20,42 @@ FetchContent_MakeAvailable(glfw)
 
 find_package(OpenGL REQUIRED)
 
-# --- 3. IMGUI SETUP ---
-# Point this to the parent folder of your imgui-docking folder
+#IMGUI PATHS
 set(IMGUI_DIR "${CMAKE_CURRENT_SOURCE_DIR}/imgui-docking")
 
 set(IMGUI_SOURCES
-        ${IMGUI_DIR}/imgui.cpp
-        ${IMGUI_DIR}/imgui_draw.cpp
-        ${IMGUI_DIR}/imgui_widgets.cpp
-        ${IMGUI_DIR}/imgui_tables.cpp
-        ${IMGUI_DIR}/backends/imgui_impl_glfw.cpp
-        ${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp
+        "${IMGUI_DIR}/imgui.cpp"
+        "${IMGUI_DIR}/imgui_draw.cpp"
+        "${IMGUI_DIR}/imgui_widgets.cpp"
+        "${IMGUI_DIR}/imgui_tables.cpp"
+        "${IMGUI_DIR}/backends/imgui_impl_glfw.cpp"
+        "${IMGUI_DIR}/backends/imgui_impl_opengl3.cpp"
 )
 
-add_executable(TrafficSimulator main.cpp
-        vehicles.h
-        vehicles.cpp
-        traffic.h
-        traffic.cpp
-        SimulationUI.cpp
-        SimulationUI.h
-        ${IMGUI_SOURCES}
+set(PROJECT_SOURCES
+        src/main.cpp
+        src/vehicles.h
+        src/vehicles.cpp
+        src/traffic.h
+        src/traffic.cpp
+        src/SimulationUI.cpp
+        src/SimulationUI.h
 )
 
-# --- 5. INCLUDE DIRECTORIES ---
+# BUILD
+add_executable(TrafficSimulator ${PROJECT_SOURCES} ${IMGUI_SOURCES})
+
+
 target_include_directories(TrafficSimulator PRIVATE
-        ${IMGUI_DIR}
-        ${IMGUI_DIR}/backends
+        src                        # Look for your headers in src/
+        ${IMGUI_DIR}               # Look for imgui.h
+        ${IMGUI_DIR}/backends      # Look for imgui_impl_xxxx.h
 )
 
-# --- 6. LINKING ---
-# Note: Use 'glfw' (lowercase) because that's the name from FetchContent
+#LINKING
 target_link_libraries(TrafficSimulator PRIVATE
         glfw
         OpenGL::GL
         gdi32
         shell32
 )
-
