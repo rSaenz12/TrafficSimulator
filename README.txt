@@ -12,6 +12,8 @@ Description:
     This program utilized Multithreading, Mutexes, Statistics, and Dear imgui, to create a simulated traffic intersection.
     Traffic is represented by heatmaps that pile up the traffic light is red.
 
+    The program should run out of the box on Windows CLion.
+
 Files in Directory:
     /imgui-docking
 
